@@ -1,0 +1,14 @@
+{
+    "name": "project",
+    "version": "1.0.0",
+    "type": "module",
+    "devDependencies": {
+        "@biomejs/biome": "^2.2.4",
+        "@tsconfig/strictest": "^2.0.6",
+        "@types/bun": "^1.2.22",
+        "typescript": "^5.9.2"
+    },
+    "dependencies": {
+        "docx": "^9.5.1"
+    }
+}
