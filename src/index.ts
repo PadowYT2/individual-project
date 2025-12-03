@@ -18,7 +18,6 @@ const tableRows: TableRow[] = [
             { label: 'Законодательные:', items: data.resources.legislative },
             { label: 'Теоретические:', items: data.resources.theoretical },
             { label: 'Статистические:', items: data.resources.statistical },
-            { label: 'Технические:', items: data.resources.technical },
         ].flatMap(({ label, items }) => [
             new Paragraph({
                 children: [new TextRun({ text: label, size: 22 })],
