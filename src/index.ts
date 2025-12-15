@@ -1,64 +1,77 @@
 import Bun from 'bun';
-import { AlignmentType, Document, Packer, Paragraph, Table, TableRow, TextRun, WidthType } from 'docx';
+import { Document, Packer, Paragraph, Table, WidthType } from 'docx';
 import data from '@/data.json' with { type: 'json' };
-import { createHyperlink, createRowData } from '@/items';
-
-const tableRows: TableRow[] = [
-    createRowData('Тема', data.theme),
-    createRowData('Актуальность', data.relevance),
-    createRowData('Проблема', data.problem),
-    createRowData('Гипотеза', data.hypothesis),
-    createRowData('Объект исследования', data.researchObject),
-    createRowData('Предмет исследования', data.researchSubject),
-    createRowData('Замысел проекта', data.researchIdea),
-    createRowData('Методы', data.methods),
-    createRowData(
-        'Ресурсы',
-        [
-            { label: 'Законодательные:', items: data.resources.legislative },
-            { label: 'Теоретические:', items: data.resources.theoretical },
-            { label: 'Статистические:', items: data.resources.statistical },
-        ].flatMap(({ label, items }) => [
-            new Paragraph({
-                children: [new TextRun({ text: label, size: 22 })],
-                spacing: { before: 100, after: 100 },
-            }),
-            ...items.map(createHyperlink),
-        ]),
-    ),
-    createRowData('Цели', data.goals),
-    createRowData('Задачи', data.tasks),
-    createRowData('Этапы', data.stages),
-    createRowData('Продукт', data.product),
-    createRowData('Результаты', data.results),
-    createRowData('Команда проекта', data.participants),
-    createRowData('Руководитель проекта', data.supervisor),
-];
+import {
+    createHeading,
+    createHyperlink,
+    createNumberedItem,
+    createParagraph,
+    createSubtitle,
+    createTableHeader,
+    createTableRowSimple,
+    createTitle,
+} from '@/items';
 
 const document = await Packer.toBuffer(
     new Document({
         sections: [
             {
                 children: [
-                    new Paragraph({
-                        alignment: AlignmentType.CENTER,
-                        spacing: { after: 200 },
-                        children: [new TextRun({ text: 'ПАСПОРТ ПРОЕКТА', size: 26, bold: true })],
-                    }),
-                    new Paragraph({
-                        alignment: AlignmentType.CENTER,
-                        spacing: { after: 300 },
-                        children: [new TextRun({ text: data.theme, size: 24 })],
-                    }),
+                    createTitle(`Реферат "${data.theme}"`),
+                    createSubtitle(data.researchIdea),
+
+                    createHeading('Актуальность проекта'),
+                    createParagraph(data.relevance),
+
+                    createHeading('Постановка проблемы'),
+                    createParagraph(data.problem),
+
+                    createHeading('Гипотеза'),
+                    createParagraph(data.hypothesis),
+
+                    createHeading('Объект исследования'),
+                    createParagraph(data.researchObject),
+                    createHeading('Предмет исследования'),
+                    createParagraph(data.researchSubject),
+
+                    createHeading('Цель проекта'),
+                    createParagraph(data.goals),
+
+                    createHeading('Задачи'),
+                    ...data.tasks.map((task, i) => createNumberedItem(task, i + 1)),
+
+                    createHeading('Методы исследования'),
+                    createParagraph(data.methods),
+
+                    createHeading('Этапы работы'),
+                    ...data.stages.map((stage, i) => createNumberedItem(stage, i + 1)),
+
+                    createHeading('Архитектура решения'),
                     new Table({
                         width: { size: 100, type: WidthType.PERCENTAGE },
-                        columnWidths: [20, 80],
-                        rows: tableRows,
+                        rows: [
+                            createTableHeader(['Продукт', 'Ожидаемые результаты']),
+                            createTableRowSimple([data.product, data.results.join('; ')]),
+                        ],
                     }),
+
+                    new Paragraph({ spacing: { before: 200 } }),
+                    createHeading('Команда проекта'),
+                    createParagraph(data.participants),
+                    createHeading('Руководители'),
+                    createParagraph(data.supervisor),
+
+                    new Paragraph({ spacing: { before: 200 } }),
+                    createHeading('Список литературы'),
+                    ...[
+                        ...data.resources.legislative,
+                        ...data.resources.theoretical,
+                        ...data.resources.statistical,
+                    ].map((resource, i) => createHyperlink(resource, i + 1)),
                 ],
             },
         ],
     }),
 );
 
-await Bun.file('passport.docx').write(document);
+await Bun.file('referat.docx').write(document);
